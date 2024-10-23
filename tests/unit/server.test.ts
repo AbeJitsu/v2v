@@ -1,6 +1,7 @@
 import request from 'supertest';
-import { app, server } from '../src/server';
 import mongoose from 'mongoose';
+import { API_PATHS, SERVER_PATHS } from '../../src/constants/PathConstants'; // Import paths
+const { app, server } = require(SERVER_PATHS.SERVER); // Use the constant for server path
 
 describe('GET /health', () => {
   afterAll(async () => {
@@ -9,7 +10,8 @@ describe('GET /health', () => {
 
     // Close the server, handling any potential errors
     await new Promise<void>((resolve, reject) => {
-      server.close((err) => {
+      server.close((err: Error | null) => {
+        // Explicitly type 'err'
         if (err) {
           reject(err); // Reject the promise if there's an error
         } else {
@@ -20,7 +22,7 @@ describe('GET /health', () => {
   });
 
   it('should return status 200 with OK message', async () => {
-    const res = await request(app).get('/health');
+    const res = await request(app).get(API_PATHS.HEALTH_CHECK);
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('OK');
   });

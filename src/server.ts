@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import connectDB from './db'; // Import the MongoDB connection function
+import connectDB from './db'; // This will soon come from PathConstants
+import { API_PATHS } from './constants/PathConstants'; // Import paths
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB
 connectDB();
 
-app.get('/health', (req, res) => {
+app.get(API_PATHS.HEALTH_CHECK, (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
 
