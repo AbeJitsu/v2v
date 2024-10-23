@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "ts-node src/server.ts",
+    "start": "ts-node src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "mongoose": "^8.7.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
