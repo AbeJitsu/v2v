@@ -5,16 +5,28 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node -P ./tsconfig.json src/server.ts",
+    "build": "tsc",
+    "postinstall": "if [ \"$NODE_ENV\" = \"production\" ]; then npm run build; fi",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "wc": "find . -type f \\( -name \"*.js\" -o -name \"*.ts\" -o -name \"*.json\" -o -name \"*.md\" -o -name \"*.scss\" -o -name \"*.html\" \\) -not -name \"package-lock.json\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" -not -path \"*/dist/*\" -print0 | xargs -0 wc -w | sort -nr",
+    "tree": "tree -L 3 -I 'node_modules|.git|package-lock.json|dist|.DS_Store' --noreport -a",
+    "tree:dir": "tree -d -L 3 -I 'node_modules|.git|package-lock.json|dist|.DS_Store' --noreport -a",
+    "gsd": "git status && echo '\n' && git diff --cached --unified=3 > staged_changes.txt"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongoose": "^8.7.2"
   },
   "devDependencies": {
+    "@types/dotenv": "^8.2.1",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.8",
     "ts-node": "^10.9.2",
