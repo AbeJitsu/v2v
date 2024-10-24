@@ -20,6 +20,13 @@ export class DatabaseOperationError extends DatabaseError {
   }
 }
 
+export class EnvironmentVariableError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'EnvironmentVariableError';
+  }
+}
+
 export const handleDbOperation = async <T>(
   operation: () => Promise<T>,
   errorMessage: string = 'Database operation failed'
