@@ -1,57 +1,81 @@
 import validator from 'validator';
 
+// Helper function to check if a string is empty or only whitespace
+const isEmptyString = (str: string) => !str || validator.isEmpty(str.trim());
+
+// General validation helper to format validation results
+const generateValidationResult = (valid: boolean, error?: string) => ({
+  valid,
+  error,
+});
+
+// Validate email and password inputs with validator and custom logic
 export const validateEmailAndPassword = (
   email: string,
   password: string
-): string | null => {
+): { valid: boolean; error?: string } => {
   if (!validator.isEmail(email)) {
-    return 'Invalid email format';
+    return generateValidationResult(false, 'Invalid email format');
   }
+
   if (password.length < 8) {
-    return 'Password must be at least 8 characters long';
+    return generateValidationResult(
+      false,
+      'Password must be at least 8 characters long'
+    );
   }
-  return null;
+
+  return generateValidationResult(true);
 };
 
-export const validateSearchQuery = (query: string): string | null => {
-  if (!query || validator.isEmpty(query.trim())) {
-    return 'Search query cannot be empty';
+// Validate search query for proper length and non-emptiness
+export const validateSearchQuery = (
+  query: string
+): { valid: boolean; error?: string } => {
+  if (isEmptyString(query)) {
+    return generateValidationResult(false, 'Search query cannot be empty');
   }
+
   if (query.length < 2) {
-    return 'Search query must be at least 2 characters long';
+    return generateValidationResult(
+      false,
+      'Search query must be at least 2 characters long'
+    );
   }
-  return null;
+
+  return generateValidationResult(true);
 };
 
+// Validate product input with multiple fields
 export const validateProductInput = (product: {
   name: string;
   price: number;
   category: string;
-}): Record<string, string> | null => {
+}): { valid: boolean; errors?: Record<string, string> } => {
   const errors: Record<string, string> = {};
 
-  if (!product.name || validator.isEmpty(product.name.trim())) {
+  if (isEmptyString(product.name)) {
     errors.name = 'Product name is required';
   }
 
-  if (
-    !product.price ||
-    !validator.isFloat(product.price.toString(), { min: 0 })
-  ) {
+  if (!validator.isFloat(product.price.toString(), { min: 0 })) {
     errors.price = 'Valid product price is required';
   }
 
-  if (!product.category || validator.isEmpty(product.category.trim())) {
+  if (isEmptyString(product.category)) {
     errors.category = 'Product category is required';
   }
 
-  return Object.keys(errors).length > 0 ? errors : null;
+  return Object.keys(errors).length > 0
+    ? { valid: false, errors }
+    : { valid: true };
 };
 
+// Validate pagination parameters (page and limit)
 export const validatePaginationParams = (
   page: number,
   limit: number
-): Record<string, string> | null => {
+): { valid: boolean; errors?: Record<string, string> } => {
   const errors: Record<string, string> = {};
 
   if (!validator.isInt(page.toString(), { min: 1 })) {
@@ -62,5 +86,28 @@ export const validatePaginationParams = (
     errors.limit = 'Limit must be a positive integer between 1 and 100';
   }
 
-  return Object.keys(errors).length > 0 ? errors : null;
+  return Object.keys(errors).length > 0
+    ? { valid: false, errors }
+    : { valid: true };
+};
+
+// General input validator for auth (email and password)
+export const validateInput = (input: { email?: string; password?: string }) => {
+  if (!input.email || !input.password) {
+    return generateValidationResult(false, 'Email and password are required');
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(input.email)) {
+    return generateValidationResult(false, 'Invalid email format');
+  }
+
+  if (input.password.length < 6) {
+    return generateValidationResult(
+      false,
+      'Password must be at least 6 characters'
+    );
+  }
+
+  return generateValidationResult(true);
 };

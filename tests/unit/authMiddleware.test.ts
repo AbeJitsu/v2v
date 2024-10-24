@@ -1,4 +1,4 @@
-import authMiddleware from '../../src/middleware/authMiddleware'; // Updated to use default import
+import { authMiddleware } from '../../src/middleware/authMiddleware'; // Corrected import
 import { Request, Response, NextFunction } from 'express';
 import { User } from '../../src/models/userModel';
 import session from 'express-session';

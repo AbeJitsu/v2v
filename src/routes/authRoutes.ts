@@ -1,8 +1,7 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, RequestHandler } from 'express';
 import * as authController from '../controllers/authController';
 
 import { authMiddleware, roleMiddleware } from '../middleware/authMiddleware';
-
 import { UserRole } from '../models/userModel';
 
 const router = express.Router();
@@ -106,12 +105,16 @@ router.get('/user', authMiddleware, authController.getUserProfile);
  *       403:
  *         description: Access denied
  */
-router.post(
-  '/change-role',
-  authMiddleware,
-  roleMiddleware([UserRole.ADMIN]),
-  authController.changeUserRole
-);
+if ('changeUserRole' in authController) {
+  router.post(
+    '/change-role',
+    authMiddleware,
+    roleMiddleware([UserRole.ADMIN]),
+    authController.changeUserRole as RequestHandler // Casting the type
+  );
+} else {
+  console.warn('changeUserRole method is not available in authController.');
+}
 
 /**
  * @swagger

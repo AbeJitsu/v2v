@@ -8,27 +8,39 @@ import {
 describe('ValidationUtils Unit Tests', () => {
   test('should validate email and password successfully', () => {
     const result = validateEmailAndPassword('test@example.com', 'password123');
-    expect(result).toBeNull();
+    expect(result).toEqual({ valid: true });
 
     const invalidEmail = validateEmailAndPassword(
       'invalid-email',
       'password123'
     );
-    expect(invalidEmail).toBe('Invalid email format');
+    expect(invalidEmail).toEqual({
+      valid: false,
+      error: 'Invalid email format',
+    });
 
     const shortPassword = validateEmailAndPassword('test@example.com', 'short');
-    expect(shortPassword).toBe('Password must be at least 8 characters long');
+    expect(shortPassword).toEqual({
+      valid: false,
+      error: 'Password must be at least 8 characters long',
+    });
   });
 
   test('should validate search query successfully', () => {
     const validQuery = validateSearchQuery('search term');
-    expect(validQuery).toBeNull();
+    expect(validQuery).toEqual({ valid: true });
 
     const emptyQuery = validateSearchQuery('');
-    expect(emptyQuery).toBe('Search query cannot be empty');
+    expect(emptyQuery).toEqual({
+      valid: false,
+      error: 'Search query cannot be empty',
+    });
 
     const shortQuery = validateSearchQuery('a');
-    expect(shortQuery).toBe('Search query must be at least 2 characters long');
+    expect(shortQuery).toEqual({
+      valid: false,
+      error: 'Search query must be at least 2 characters long',
+    });
   });
 
   test('should validate product input successfully', () => {
@@ -37,7 +49,7 @@ describe('ValidationUtils Unit Tests', () => {
       price: 100,
       category: 'Category1',
     });
-    expect(validProduct).toBeNull();
+    expect(validProduct).toEqual({ valid: true });
 
     const invalidProduct = validateProductInput({
       name: '',
@@ -45,24 +57,29 @@ describe('ValidationUtils Unit Tests', () => {
       category: '',
     });
     expect(invalidProduct).toEqual({
-      name: 'Product name is required',
-      price: 'Valid product price is required',
-      category: 'Product category is required',
+      valid: false,
+      errors: {
+        name: 'Product name is required',
+        price: 'Valid product price is required',
+        category: 'Product category is required',
+      },
     });
   });
 
   test('should validate pagination parameters successfully', () => {
     const validParams = validatePaginationParams(1, 10);
-    expect(validParams).toBeNull();
+    expect(validParams).toEqual({ valid: true });
 
     const invalidPage = validatePaginationParams(-1, 10);
     expect(invalidPage).toEqual({
-      page: 'Page must be a positive integer',
+      valid: false,
+      errors: { page: 'Page must be a positive integer' },
     });
 
     const invalidLimit = validatePaginationParams(1, 200);
     expect(invalidLimit).toEqual({
-      limit: 'Limit must be a positive integer between 1 and 100',
+      valid: false,
+      errors: { limit: 'Limit must be a positive integer between 1 and 100' },
     });
   });
 });

@@ -77,7 +77,6 @@ export const login = async (req: Request, res: Response) => {
   try {
     // const user = await userService.getUserByEmail(email!); // Placeholder
     if (false) {
-      // Replace with actual logic
       return handleAuthError(
         res,
         new Error('Invalid credentials'),
@@ -86,7 +85,6 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Token and session logic to be added later
-    // logger.info(`User logged in successfully`); // Commented out logger
     handleSuccess(res, 'Login successful', {}); // Placeholder
   } catch (error) {
     handleAuthError(res, error, 'An internal error occurred during login');
@@ -95,7 +93,6 @@ export const login = async (req: Request, res: Response) => {
 
 // Logout functionality
 export const logout = async (req: AuthenticatedRequest, res: Response) => {
-  // logger.debug('Logging out user with session ID:', { session: req.session }); // Commented out logger
   if (!req.session) {
     return handleError(
       res,
@@ -110,7 +107,6 @@ export const logout = async (req: AuthenticatedRequest, res: Response) => {
       return handleAuthError(res, err, 'Failed to log out, please try again');
     }
     res.clearCookie('connect.sid');
-    // logger.info(`User logged out successfully`); // Commented out logger
     handleSuccess(res, 'Logged out successfully');
   });
 };
@@ -132,7 +128,6 @@ export const getUserProfile = async (
   try {
     // const user: IUser | null = await userService.getUserById(req.user_id); // Placeholder
     if (false) {
-      // Replace with actual logic
       return handleError(
         res,
         new Error('User not found'),
@@ -141,7 +136,6 @@ export const getUserProfile = async (
       );
     }
 
-    // logger.info(`User profile fetched successfully`); // Commented out logger
     handleSuccess(res, 'User profile fetched successfully', {
       preferredFirstName: 'User First Name', // Placeholder
       email: 'user@example.com', // Placeholder
@@ -156,50 +150,29 @@ export const getUserProfile = async (
   }
 };
 
-// Change user role
-// export const changeUserRole = async (req: AuthenticatedRequest, res: Response) => {
-//   const { userId, role } = req.body;
-//   if (!Object.values(UserRole).includes(role)) {
-//     return handleError(res, new Error('Invalid role'), 'Invalid role', 400);
-//   }
+// Change user role (commented out, but retained for future implementation)
+/*
+export const changeUserRole = async (req: AuthenticatedRequest, res: Response) => {
+  const { userId, role } = req.body;
+  if (!Object.values(UserRole).includes(role)) {
+    return handleError(res, new Error('Invalid role'), 'Invalid role', 400);
+  }
 
-//   try {
-//     // const user: IUser | null = await userService.getUserById(userId); // Placeholder
-//     if (false) {
-//       // Replace with actual logic
-//       return handleError(
-//         res,
-//         new Error('User not found'),
-//         'User not found',
-//         404
-//       );
-//     }
+  try {
+    // const user: IUser | null = await userService.getUserById(userId); // Placeholder
+    if (false) {
+      return handleError(
+        res,
+        new Error('User not found'),
+        'User not found',
+        404
+      );
+    }
 
-//     // Logic for updating user role to be added later
-//     // logger.info(`User role updated successfully`); // Commented out logger
-//     handleSuccess(res, 'User role updated successfully');
-//   } catch (error) {
-//     handleAuthError(res, error, 'Error updating user role');
-//   }
-// };
-
-
-
-
-
-// src/controllers/authController.ts
-
-import { validateInput } from '../utils/validationUtils';
-
-// Example usage:
-const validation = validateInput(email, password);  // Call with individual arguments
-if (!validation.valid) {
-  throw new Error(validation.error!);
-}
-
-
-Fix in authController.ts
-
-Ensure you’re passing email and password separately and handling the return value correctly.
-
-This will match the updated validateInput function. You can now re-run the tests after these changes.
+    // Logic for updating user role to be added later
+    handleSuccess(res, 'User role updated successfully');
+  } catch (error) {
+    handleAuthError(res, error, 'Error updating user role');
+  }
+};
+*/
