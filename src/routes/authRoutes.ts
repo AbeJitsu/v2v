@@ -1,6 +1,13 @@
-import express, { Request, Response, RequestHandler } from 'express';
-import * as authController from '../controllers/authController';
+// src/routes/authRoutes.ts
 
+import express, { Request, Response } from 'express';
+import {
+  register,
+  login,
+  logout,
+  getUserProfile,
+  changeUserRole,
+} from '../controllers/authController';
 import { authMiddleware, roleMiddleware } from '../middleware/authMiddleware';
 import { UserRole } from '../models/userModel';
 
@@ -29,7 +36,7 @@ const router = express.Router();
  *       400:
  *         description: Bad request
  */
-router.post('/register', authController.register);
+router.post('/register', register);
 
 /**
  * @swagger
@@ -54,7 +61,7 @@ router.post('/register', authController.register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', authController.login);
+router.post('/login', login);
 
 /**
  * @swagger
@@ -66,7 +73,7 @@ router.post('/login', authController.login);
  *       200:
  *         description: Logout successful
  */
-router.post('/logout', authController.logout);
+router.post('/logout', logout);
 
 /**
  * @swagger
@@ -80,7 +87,7 @@ router.post('/logout', authController.logout);
  *       401:
  *         description: User not authenticated
  */
-router.get('/user', authMiddleware, authController.getUserProfile);
+router.get('/user', authMiddleware, getUserProfile);
 
 /**
  * @swagger
@@ -105,16 +112,12 @@ router.get('/user', authMiddleware, authController.getUserProfile);
  *       403:
  *         description: Access denied
  */
-if ('changeUserRole' in authController) {
-  router.post(
-    '/change-role',
-    authMiddleware,
-    roleMiddleware([UserRole.ADMIN]),
-    authController.changeUserRole as RequestHandler // Casting the type
-  );
-} else {
-  console.warn('changeUserRole method is not available in authController.');
-}
+router.post(
+  '/change-role',
+  authMiddleware,
+  roleMiddleware([UserRole.ADMIN]),
+  changeUserRole
+);
 
 /**
  * @swagger
