@@ -182,3 +182,24 @@ export const getUserProfile = async (
 //     handleAuthError(res, error, 'Error updating user role');
 //   }
 // };
+
+
+
+
+
+// src/controllers/authController.ts
+
+import { validateInput } from '../utils/validationUtils';
+
+// Example usage:
+const validation = validateInput(email, password);  // Call with individual arguments
+if (!validation.valid) {
+  throw new Error(validation.error!);
+}
+
+
+Fix in authController.ts
+
+Ensure you’re passing email and password separately and handling the return value correctly.
+
+This will match the updated validateInput function. You can now re-run the tests after these changes.
