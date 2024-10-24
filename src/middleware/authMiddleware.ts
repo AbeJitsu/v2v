@@ -1,68 +1,26 @@
-import { authMiddleware } from '../../src/middleware/authMiddleware';
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../../src/models/userModel';
+import { User } from '../models/userModel';
 import session from 'express-session';
 
-// Mock the User model's findById method
-jest.mock('../../src/models/userModel', () => ({
-  User: {
-    findById: jest.fn(),
-  },
-}));
-
-// Extend express-session to include user_id
-declare module 'express-session' {
-  interface SessionData {
-    user_id?: string;
+export default async function authMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (req.session && req.session.user_id) {
+      // Check if session exists and user_id is available
+      const user = await User.findById(req.session.user_id);
+      if (user) {
+        // If user is found, proceed to the next middleware
+        return next();
+      }
+    }
+    // If no user is found or session is missing, return 401 Unauthorized
+    res.status(401).json({ message: 'User not authenticated' });
+  } catch (error) {
+    // Handle any potential errors during the user lookup
+    console.error('Error in authMiddleware:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }
-
-let req: Partial<Request>;
-let res: Partial<Response>;
-let next: jest.Mock;
-
-beforeEach(() => {
-  req = {
-    session: {
-      user_id: 'user123',
-      id: 'sessionId',
-      cookie: { originalMaxAge: 60000 }, // Session cookie properties
-      regenerate: jest.fn(),
-      destroy: jest.fn(),
-      reload: jest.fn(),
-      resetMaxAge: jest.fn(),
-      save: jest.fn(),
-      touch: jest.fn(),
-    } as session.Session & Partial<session.SessionData>,
-  };
-
-  res = {
-    status: jest.fn().mockReturnThis(),
-    json: jest.fn(),
-  };
-
-  next = jest.fn();
-
-  // Mock User.findById to return a user
-  (User.findById as jest.Mock).mockResolvedValue({
-    _id: 'user123',
-    email: 'test@example.com',
-  });
-});
-
-describe('AuthMiddleware Unit Tests', () => {
-  test('should call next when session is valid', async () => {
-    await authMiddleware(req as Request, res as Response, next);
-    expect(User.findById).toHaveBeenCalledWith('user123');
-    expect(next).toHaveBeenCalled();
-  });
-
-  test('should return 401 if session is invalid', async () => {
-    req.session = undefined; // Simulate an invalid session
-    await authMiddleware(req as Request, res as Response, next);
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'User not authenticated',
-    });
-  });
-});
