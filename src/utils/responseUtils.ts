@@ -41,3 +41,23 @@ export const handleError = (
     error: error.message || error,
   });
 };
+
+/**
+ * Perform a database operation and handle the success or error response.
+ *
+ * @param res - Express Response object.
+ * @param operation - Async database operation to be performed.
+ * @param successMessage - Success message to send back when operation is successful.
+ */
+export const performDbOperation = async <T>(
+  res: Response,
+  operation: () => Promise<T>,
+  successMessage: string
+): Promise<void> => {
+  try {
+    const result = await operation();
+    handleSuccess(res, successMessage, { data: result });
+  } catch (error) {
+    handleError(res, error as Error, 'Database operation failed');
+  }
+};
