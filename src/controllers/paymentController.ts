@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { processPayment } from '../../services/paymentService';
+import { processPayment } from '../services/paymentService';
 import { handleError, handleSuccess } from '../utils/responseUtils';
 
 // Handle Payment
@@ -10,7 +10,9 @@ export const handlePayment = async (
   const { token, amount, currency } = req.body;
 
   if (!token || !amount || !currency) {
-    res.status(400).json({ message: 'Missing required payment details' });
+    res
+      .status(400)
+      .json({ status: 'error', message: 'Missing required payment details' });
     return;
   }
 

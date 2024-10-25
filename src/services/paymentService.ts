@@ -20,12 +20,12 @@ export const processPayment = async (
   };
 
   try {
-    const { result } = await client.paymentsApi.createPayment({
+    const response = await client.paymentsApi.createPayment({
       sourceId: token,
       idempotencyKey,
       amountMoney: paymentMoney,
     });
-    return result.payment;
+    return response.result.payment; // Ensure this matches your test expectations
   } catch (error) {
     logger.error('Payment processing error:', error);
     throw new Error('Failed to process payment');
