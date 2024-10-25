@@ -4,16 +4,17 @@ import {
   updateUser,
   deleteUser,
   getUserByEmail,
-} from '../../src/services/userService';
-import { User } from '../../src/models/userModel';
-import { handleDbOperation } from '../../src/utils/dbUtils';
+} from '../../../src/services/userService';
+import { User, IUser, UserRole } from '../../../src/models/userModel'; // Ensure UserRole is imported
+import { handleDbOperation } from '../../../src/utils/dbUtils';
+import { Types } from 'mongoose'; // Import Types for ObjectId
 
-jest.mock('../../src/models/userModel');
-jest.mock('../../src/utils/dbUtils');
+jest.mock('../../../src/models/userModel');
+jest.mock('../../../src/utils/dbUtils');
 
 describe('UserService Unit Tests', () => {
-  const mockUser = {
-    _id: '12345',
+  const mockUser: IUser = {
+    _id: new Types.ObjectId(), // Use ObjectId
     email: 'test@example.com',
     password: 'password123',
     preferredFirstName: 'John',
@@ -29,7 +30,7 @@ describe('UserService Unit Tests', () => {
       state: 'TS',
       zip: '12345',
     },
-    role: 'user',
+    role: UserRole.USER, // Use the enum value directly
   };
 
   afterEach(() => {
@@ -40,7 +41,7 @@ describe('UserService Unit Tests', () => {
     it('should create a new user', async () => {
       (handleDbOperation as jest.Mock).mockResolvedValue(mockUser);
 
-      const userData = { ...mockUser };
+      const userData: IUser = { ...mockUser }; // Ensure userData is a proper IUser
       const result = await createUser(userData);
 
       expect(handleDbOperation).toHaveBeenCalledWith(
@@ -55,7 +56,7 @@ describe('UserService Unit Tests', () => {
     it('should return a user by ID', async () => {
       (handleDbOperation as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await getUserById('12345');
+      const result = await getUserById(mockUser._id.toString());
 
       expect(handleDbOperation).toHaveBeenCalledWith(
         expect.any(Function),
@@ -78,7 +79,7 @@ describe('UserService Unit Tests', () => {
       const updatedUser = { ...mockUser, preferredFirstName: 'UpdatedName' };
       (handleDbOperation as jest.Mock).mockResolvedValue(updatedUser);
 
-      const result = await updateUser('12345', {
+      const result = await updateUser(mockUser._id.toString(), {
         preferredFirstName: 'UpdatedName',
       });
 
@@ -91,7 +92,7 @@ describe('UserService Unit Tests', () => {
     it('should delete a user by ID', async () => {
       (handleDbOperation as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await deleteUser('12345');
+      const result = await deleteUser(mockUser._id.toString());
 
       expect(handleDbOperation).toHaveBeenCalledWith(
         expect.any(Function),

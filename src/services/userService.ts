@@ -1,13 +1,18 @@
 import { User, IUser } from '../models/userModel';
 import { handleDbOperation } from '../utils/dbUtils';
+import { Types } from 'mongoose'; // Ensure this import is present
 
-export const createUser = async (userData: any) => {
+// Create a new user
+export const createUser = async (userData: IUser) => {
+  // Ensure userData._id is a Types.ObjectId
+  userData._id = new Types.ObjectId(); // Assign a new ObjectId if not provided
   return handleDbOperation(
     () => new User(userData).save(),
     'User created successfully'
   );
 };
 
+// Get a user by ID
 export const getUserById = async (userId: string) => {
   return handleDbOperation(
     () => User.findById(userId),
@@ -15,13 +20,18 @@ export const getUserById = async (userId: string) => {
   );
 };
 
-export const updateUser = async (userId: string, updateData: any) => {
+// Update an existing user
+export const updateUser = async (
+  userId: string,
+  updateData: Partial<IUser>
+) => {
   return handleDbOperation(
     () => User.findByIdAndUpdate(userId, updateData, { new: true }),
     'User updated successfully'
   );
 };
 
+// Delete a user by ID
 export const deleteUser = async (userId: string) => {
   return handleDbOperation(
     () => User.findByIdAndDelete(userId),
@@ -29,6 +39,7 @@ export const deleteUser = async (userId: string) => {
   );
 };
 
+// Get a user by email
 export const getUserByEmail = async (email: string) => {
   const sanitizedEmail = email.trim().toLowerCase();
   return handleDbOperation(
