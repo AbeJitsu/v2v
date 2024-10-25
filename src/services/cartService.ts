@@ -1,17 +1,34 @@
 import mongoose, { FilterQuery } from 'mongoose';
-import Cart, { ICart } from '../models/cartModel';
-import Product from '../models/productModel';
+import Cart, { ICart, ICartItem } from '../models/cartModel';
 import { logger } from '../middleware/logger';
 
-// Generalized error handler
-const handleServiceError = (message: string, error: any) => {
-  logger.error(message, error);
-  throw new Error(message);
+interface CartQuery {
+  user?: string | mongoose.Types.ObjectId;
+  sessionToken?: string;
+  [key: string]: any;
+}
+
+interface CartOperation {
+  type: 'add' | 'update' | 'remove' | 'sync';
+  quantity?: number;
+  cartItems?: Partial<ICartItem>[];
+}
+
+// Fetch and populate a cart
+const fetchCart = async (query: CartQuery): Promise<ICart | null> => {
+  try {
+    return await Cart.findOne(query as FilterQuery<ICart>).populate(
+      'items.product'
+    );
+  } catch (error) {
+    logger.error('Error fetching cart:', error);
+    throw new Error('Failed to fetch cart');
+  }
 };
 
-// Fetch or create cart
-const getOrCreateCart = async (query: FilterQuery<ICart>): Promise<ICart> => {
-  let cart = await Cart.findOne(query).populate('items.product');
+// Ensure a cart exists or create a new one
+const getOrCreateCart = async (query: CartQuery): Promise<ICart> => {
+  let cart = await fetchCart(query);
   if (!cart) {
     cart = new Cart({
       user: query.user,
@@ -22,135 +39,107 @@ const getOrCreateCart = async (query: FilterQuery<ICart>): Promise<ICart> => {
   return cart;
 };
 
-// Save and fetch updated cart
+// Save and re-fetch a cart
 const saveAndFetchCart = async (
   cart: ICart,
-  query: FilterQuery<ICart>
-): Promise<ICart> => {
+  query: CartQuery
+): Promise<ICart | null> => {
   await cart.save();
-  return await Cart.findOne(query).populate('items.product');
+  return await fetchCart(query);
 };
 
-// Modify items in cart
-const modifyCartItems = (
-  cart: ICart,
-  productId: string,
-  operation: { type: 'add' | 'update' | 'remove'; quantity?: number }
-) => {
+// Handle cart item operations
+const handleCartItemOperation = async (
+  query: CartQuery,
+  productId: string | null,
+  operation: CartOperation
+): Promise<ICart | null> => {
+  let cart = await getOrCreateCart(query);
   const itemIndex = cart.items.findIndex(
     (item) => item.product.toString() === productId
   );
 
-  if (operation.type === 'add' && operation.quantity) {
-    if (itemIndex > -1) {
-      cart.items[itemIndex].quantity += operation.quantity;
-    } else {
-      cart.items.push({
-        product: new mongoose.Types.ObjectId(productId),
-        quantity: operation.quantity,
-      });
-    }
-  } else if (
-    operation.type === 'update' &&
-    operation.quantity &&
-    itemIndex > -1
-  ) {
-    cart.items[itemIndex].quantity = operation.quantity;
-  } else if (operation.type === 'remove' && itemIndex > -1) {
-    cart.items.splice(itemIndex, 1);
+  switch (operation.type) {
+    case 'add':
+      if (itemIndex !== -1 && operation.quantity) {
+        cart.items[itemIndex].quantity += operation.quantity;
+      } else if (productId && operation.quantity) {
+        cart.items.push({
+          _id: new mongoose.Types.ObjectId(),
+          product: new mongoose.Types.ObjectId(productId),
+          quantity: operation.quantity,
+        } as ICartItem);
+      }
+      break;
+    case 'update':
+      if (itemIndex !== -1 && operation.quantity) {
+        cart.items[itemIndex].quantity = operation.quantity;
+      }
+      break;
+    case 'remove':
+      if (itemIndex !== -1) {
+        cart.items.splice(itemIndex, 1);
+      }
+      break;
+    case 'sync':
+      if (operation.cartItems) {
+        cart.items = operation.cartItems.map((item) => ({
+          ...item,
+          _id: new mongoose.Types.ObjectId(),
+          product: new mongoose.Types.ObjectId(String(item.product)),
+        })) as ICartItem[];
+      }
+      break;
   }
+
+  return await saveAndFetchCart(cart, query);
 };
 
-// Cart functions
-export const getCart = async (
-  query: FilterQuery<ICart>
-): Promise<ICart | null> => {
-  try {
-    return await Cart.findOne(query).populate('items.product');
-  } catch (error) {
-    handleServiceError('Failed to fetch cart', error);
-  }
-};
+// Exported cart service functions
+export const getCart = (query: CartQuery): Promise<ICart | null> =>
+  fetchCart(query);
 
-export const addItemToCart = async (
-  query: FilterQuery<ICart>,
+export const addItemToCart = (query: CartQuery, productId: string, quantity: number) =>
+  handleCartItemOperation(query, productId, { type: 'add', quantity });
+
+export const updateItemQuantity = (
+  query: CartQuery,
   productId: string,
   quantity: number
-): Promise<ICart | null> => {
-  try {
-    const cart = await getOrCreateCart(query);
-    modifyCartItems(cart, productId, { type: 'add', quantity });
-    return await saveAndFetchCart(cart, query);
-  } catch (error) {
-    handleServiceError('Failed to add item to cart', error);
-  }
-};
+) => handleCartItemOperation(query, productId, { type: 'update', quantity });
 
-export const updateItemQuantity = async (
-  query: FilterQuery<ICart>,
-  productId: string,
-  quantity: number
-): Promise<ICart | null> => {
-  try {
-    const cart = await getOrCreateCart(query);
-    modifyCartItems(cart, productId, { type: 'update', quantity });
-    return await saveAndFetchCart(cart, query);
-  } catch (error) {
-    handleServiceError('Failed to update item quantity', error);
-  }
-};
+export const removeItemFromCart = (query: CartQuery, productId: string) =>
+  handleCartItemOperation(query, productId, { type: 'remove' });
 
-export const removeItemFromCart = async (
-  query: FilterQuery<ICart>,
-  productId: string
-): Promise<ICart | null> => {
-  try {
-    const cart = await getOrCreateCart(query);
-    modifyCartItems(cart, productId, { type: 'remove' });
-    return await saveAndFetchCart(cart, query);
-  } catch (error) {
-    handleServiceError('Failed to remove item from cart', error);
-  }
-};
-
-export const syncCart = async (
-  query: FilterQuery<ICart>,
-  cartItems: any[]
-): Promise<ICart | null> => {
-  try {
-    const cart = await getOrCreateCart(query);
-    cart.items = cartItems.map((item) => ({
-      product: new mongoose.Types.ObjectId(item.product),
-      quantity: item.quantity,
-    }));
-    return await saveAndFetchCart(cart, query);
-  } catch (error) {
-    handleServiceError('Failed to sync cart', error);
-  }
-};
+export const syncCart = (query: CartQuery, cartItems: Partial<ICartItem>[]) =>
+  handleCartItemOperation(query, null, { type: 'sync', cartItems });
 
 export const mergeCart = async (
   userId: string,
   localCartItems: any[]
 ): Promise<ICart | null> => {
   try {
-    const userCart = await getOrCreateCart({ user: userId });
-    localCartItems.forEach((localItem) => {
+    let userCart = await getOrCreateCart({ user: userId });
+
+    for (const localItem of localCartItems) {
       const itemIndex = userCart.items.findIndex(
         (item) => item.product.toString() === localItem.product._id
       );
-      if (itemIndex > -1) {
+      if (itemIndex !== -1) {
         userCart.items[itemIndex].quantity += localItem.quantity;
       } else {
         userCart.items.push({
+          _id: new mongoose.Types.ObjectId(),
           product: new mongoose.Types.ObjectId(localItem.product._id),
           quantity: localItem.quantity,
-        });
+        } as ICartItem);
       }
-    });
+    }
+
     return await saveAndFetchCart(userCart, { user: userId });
   } catch (error) {
-    handleServiceError('Failed to merge cart', error);
+    logger.error('Failed to merge cart:', error);
+    throw new Error('Failed to merge cart');
   }
 };
 
@@ -159,16 +148,16 @@ export const convertGuestCartToUserCart = async (
   userId: string
 ): Promise<ICart | null> => {
   try {
-    const guestCart = await Cart.findOne({ sessionToken }).populate(
-      'items.product'
-    );
+    const guestCart = await fetchCart({ sessionToken });
     if (!guestCart) return null;
 
-    guestCart.user = userId;
-    guestCart.sessionToken = null;
+    guestCart.user = new mongoose.Types.ObjectId(userId);
+    guestCart.sessionToken = undefined;
+
+    await guestCart.save();
 
     const userCart = await Cart.findOneAndUpdate(
-      { user: userId },
+      { user: new mongoose.Types.ObjectId(userId) },
       { $addToSet: { items: { $each: guestCart.items } } },
       { new: true, upsert: true }
     ).populate('items.product');
@@ -176,6 +165,7 @@ export const convertGuestCartToUserCart = async (
     await guestCart.deleteOne();
     return userCart;
   } catch (error) {
-    handleServiceError('Failed to convert guest cart to user cart', error);
+    logger.error('Failed to convert guest cart to user cart:', error);
+    throw new Error('Failed to convert guest cart to user cart');
   }
 };
