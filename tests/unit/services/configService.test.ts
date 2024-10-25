@@ -1,5 +1,5 @@
 // tests/unit/configService.test.ts
-import { configService } from '../../src/services/configService';
+import { configService } from '../../../src/services/configService';
 import { MongoClient } from 'mongodb';
 
 jest.mock('mongodb');
