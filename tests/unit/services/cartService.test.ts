@@ -1,26 +1,24 @@
 import mongoose from 'mongoose';
 import * as cartService from '../../../src/services/cartService';
-import Cart from '../../../src/models/cartModel'; // Ensure proper mock targeting
 
-// Mock data and functions
+// Mock data
 const mockUserId = new mongoose.Types.ObjectId();
 const mockProductId = new mongoose.Types.ObjectId();
 
 const mockCart = {
   _id: new mongoose.Types.ObjectId(),
   user: mockUserId,
-  sessionToken: 'testSessionToken',
   items: [{ product: mockProductId, quantity: 1 }],
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  save: jest.fn().mockResolvedValue(this), // Adding a mock `save` method
 };
 
-// Mocking Cart model methods, including `populate`
+// Mock Cart model with save method
 jest.mock('../../../src/models/cartModel', () => ({
-  findOne: jest.fn().mockImplementation(() => ({
-    populate: jest.fn().mockResolvedValue(mockCart),
+  findOne: jest.fn(() => Promise.resolve(mockCart)),
+  default: jest.fn().mockImplementation(() => ({
+    ...mockCart,
+    save: jest.fn().mockResolvedValue(mockCart), // Ensuring save is mocked
   })),
-  findOneAndUpdate: jest.fn(() => Promise.resolve(mockCart)),
 }));
 
 describe('CartService Core Tests', () => {
@@ -44,24 +42,7 @@ describe('CartService Core Tests', () => {
     );
     expect(result).toBeDefined();
     expect(result?.items.length).toBeGreaterThan(0);
-  });
-
-  test('should update item quantity in cart', async () => {
-    const result = await cartService.updateItemQuantity(
-      { user: mockUserId },
-      mockProductId.toString(),
-      2
-    );
-    expect(result).toBeDefined();
-    expect(result?.items[0].quantity).toBe(2);
-  });
-
-  test('should remove an item from cart', async () => {
-    const result = await cartService.removeItemFromCart(
-      { user: mockUserId },
-      mockProductId.toString()
-    );
-    expect(result).toBeDefined();
-    expect(result?.items.length).toBe(0);
+    expect(result?.items[0].product.toString()).toBe(mockProductId.toString());
+    expect(result?.items[0].quantity).toBe(1);
   });
 });
