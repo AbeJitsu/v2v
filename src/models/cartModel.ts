@@ -13,21 +13,23 @@ export interface ICart extends Document {
   updatedAt: Date;
 }
 
+// CartItem schema definition
 const CartItemSchema = new Schema<ICartItem>({
   product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
 });
 
+// Cart schema definition
 const CartSchema = new Schema<ICart>(
   {
     user: { type: Schema.Types.ObjectId, ref: 'User' },
-    sessionToken: { type: String },
-    items: [CartItemSchema],
+    sessionToken: { type: String, default: null },
+    items: { type: [CartItemSchema], default: [] },
   },
   {
-    timestamps: true, // Automatically manage createdAt and updatedAt
+    timestamps: true,
   }
 );
 
-const Cart = mongoose.model<ICart>('Cart', CartSchema);
-export default Cart;
+export const Cart = mongoose.model<ICart>('Cart', CartSchema); // Named export
+export default Cart; // Optional default export for compatibility
