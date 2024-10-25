@@ -28,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.46",
     "mongoose": "^8.7.2",
+    "square": "^38.2.0",
     "tree": "^0.1.3",
     "validator": "^13.12.0"
   },
