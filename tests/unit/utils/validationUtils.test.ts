@@ -3,7 +3,7 @@ import {
   validateSearchQuery,
   validateProductInput,
   validatePaginationParams,
-} from '../../src/utils/validationUtils';
+} from '../../../src/utils/validationUtils';
 
 describe('ValidationUtils Unit Tests', () => {
   test('should validate email and password successfully', () => {

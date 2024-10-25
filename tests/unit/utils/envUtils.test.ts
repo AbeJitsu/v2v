@@ -2,7 +2,7 @@ import {
   getEnvVar,
   requireEnvVar,
   validateEnvVariables,
-} from '../../src/utils/envUtils';
+} from '../../../src/utils/envUtils';
 
 describe('EnvUtils Unit Tests', () => {
   beforeEach(() => {

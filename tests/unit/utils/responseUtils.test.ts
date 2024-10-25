@@ -1,4 +1,4 @@
-import { handleError } from '../../src/utils/responseUtils';
+import { handleError } from '../../../src/utils/responseUtils';
 import { Response } from 'express';
 
 describe('ResponseUtils Unit Tests', () => {
