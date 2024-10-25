@@ -1,10 +1,19 @@
-import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/userModel';
-import session from 'express-session';
+// src/middleware/authMiddleware.ts
 
-// The auth middleware to check if the user is authenticated
+import { Request, Response, NextFunction } from 'express';
+import { User, UserRole } from '../models/userModel';
+import session from 'express-session';
+import mongoose from 'mongoose';
+
+// Extend the Request interface to include user_id
+interface AuthenticatedRequest extends Request {
+  session: session.Session & { user_id?: string };
+  user_id?: string;
+}
+
+// Middleware to authenticate user
 export const authMiddleware = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -15,7 +24,8 @@ export const authMiddleware = async (
       const user = await User.findById(req.session.user_id);
 
       if (user) {
-        // User exists, allow the request to proceed
+        // Assign user_id to the request object for downstream use
+        req.user_id = user._id.toString();
         return next();
       }
     }
@@ -29,13 +39,17 @@ export const authMiddleware = async (
   }
 };
 
-// The role middleware to check if the user has the required role
-export const roleMiddleware = (requiredRoles: string[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+// Middleware to authorize based on user roles
+export const roleMiddleware = (requiredRoles: UserRole[]) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      // Assuming `req.session.user_id` stores the authenticated user's ID
-      if (req.session && req.session.user_id) {
-        const user = await User.findById(req.session.user_id);
+      // Ensure user_id is available on the request object
+      if (req.user_id) {
+        const user = await User.findById(req.user_id);
 
         if (user && requiredRoles.includes(user.role)) {
           // User has the required role, allow the request to proceed

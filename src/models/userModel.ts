@@ -1,4 +1,6 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+// src/models/userModel.ts
+
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 interface IAddress {
   street: string;
@@ -14,7 +16,8 @@ export enum UserRole {
   VIP = 'vip',
 }
 
-export interface IUser extends Document {
+export interface IUser {
+  _id: Types.ObjectId;
   email: string;
   password: string;
   preferredFirstName: string;
@@ -48,7 +51,7 @@ const userSchema = new Schema<IUser>({
 
 // Removed the password hashing hook and bcrypt code
 
-const User = mongoose.model<IUser>('User', userSchema);
+const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
 
 // Only export the User model here
 export { User };
