@@ -1,10 +1,10 @@
-// tests/unit/authService.test.ts
 import {
   generateToken,
   verifyToken,
   verifyPassword,
   hashPassword,
-} from '../../src/services/authService';
+} from '../../../src/services/authService';
+import { UserRole } from '../../../src/models/userModel'; // Ensure this import is present
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
@@ -12,7 +12,7 @@ jest.mock('jsonwebtoken');
 jest.mock('bcryptjs');
 
 describe('AuthService Unit Tests', () => {
-  const mockUser = { _id: 'user123', role: 'user' };
+  const mockUser = { _id: 'user123', role: UserRole.USER }; // Use UserRole enum
 
   afterEach(() => {
     jest.clearAllMocks();
