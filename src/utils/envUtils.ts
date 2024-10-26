@@ -10,7 +10,7 @@ export const getEnvVar = (key: string): EnvVar => process.env[key];
 
 export const requireEnvVar = (key: string): string => {
   const value = getEnvVar(key);
-  if (value === undefined) {
+  if (!value) {
     throw new EnvironmentVariableError(
       `Environment variable ${key} is not set`
     );
@@ -18,21 +18,11 @@ export const requireEnvVar = (key: string): string => {
   return value;
 };
 
-const toNumber = (value: EnvVar, defaultValue?: number): number => {
-  if (value === undefined) {
-    if (defaultValue !== undefined) return defaultValue;
-    throw new EnvironmentVariableError(
-      'Value is undefined and no default provided'
-    );
-  }
-
-  const num = Number(value);
+const toNumber = (value: EnvVar, defaultValue = 3001): number => {
+  const num = Number(value ?? defaultValue);
   if (isNaN(num)) {
-    throw new EnvironmentVariableError(
-      `Value "${value}" cannot be converted to a number`
-    );
+    throw new EnvironmentVariableError(`"${value}" is not a valid number`);
   }
-
   return num;
 };
 
@@ -49,21 +39,20 @@ const initializeConfigService = async (): Promise<void> => {
   }
 };
 
-const isCloudEnvironment = async (): Promise<boolean> => {
+export const isCloudEnvironment = async (): Promise<boolean> => {
   await initializeConfigService();
-  const config = await configService.getConfig();
-  return config.useCloudBackend;
+  return (await configService.getConfig()).useCloudBackend;
 };
 
-const isCloudDatabase = async (): Promise<boolean> => {
+export const isCloudDatabase = async (): Promise<boolean> => {
   await initializeConfigService();
-  const config = await configService.getConfig();
-  return config.useCloudDatabase;
+  return (await configService.getConfig()).useCloudDatabase;
 };
 
 const getUrl = async (cloudKey: string, localKey: string): Promise<string> => {
-  const isCloud = await isCloudEnvironment();
-  return isCloud ? requireEnvVar(cloudKey) : requireEnvVar(localKey);
+  return (await isCloudEnvironment())
+    ? requireEnvVar(cloudKey)
+    : requireEnvVar(localKey);
 };
 
 export const getBackendUrl = () =>
@@ -76,11 +65,10 @@ export const getSessionSecret = (): string => requireEnvVar('SESSION_SECRET');
 export const getJwtSecret = (): string => requireEnvVar('JWT_SECRET');
 export const getSquareAccessToken = (): string =>
   requireEnvVar('SQUARE_ACCESS_TOKEN');
-
 export const getPort = (): number => PORT;
 
 export const validateEnvVariables = (): void => {
-  const requiredVars = [
+  [
     'NODE_ENV',
     'PORT',
     'MONGODB_URI',
@@ -92,7 +80,5 @@ export const validateEnvVariables = (): void => {
     'SESSION_SECRET',
     'JWT_SECRET',
     'SQUARE_ACCESS_TOKEN',
-  ];
-
-  requiredVars.forEach(requireEnvVar);
+  ].forEach(requireEnvVar);
 };
