@@ -1,13 +1,14 @@
-const express = require('express');
-const request = require('supertest');
+// tests/unit/routes/diagnosticRoutes.test.ts
+import express from 'express';
+import request from 'supertest';
 
-describe('Diagnostic Routes', () => {
-  let app;
+describe('Diagnostic Route Unit Test', () => {
+  let app: express.Application;
 
   beforeAll(() => {
     app = express();
 
-    // Minimal route setup for isolated unit testing
+    // Define the mock route directly for testing purposes
     app.get('/api/diagnostic', (req, res) => {
       res.status(200).json({
         serverLocation: 'Mock Location',
