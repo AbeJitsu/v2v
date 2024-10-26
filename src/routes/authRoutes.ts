@@ -140,4 +140,5 @@ router.get(
   }
 );
 
+// Ensure proper export
 export default router;

@@ -1,5 +1,3 @@
-// src/middleware/authMiddleware.ts
-
 import { Request, Response, NextFunction } from 'express';
 import { User, UserRole } from '../models/userModel';
 import session from 'express-session';
@@ -16,23 +14,20 @@ export const authMiddleware = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     // Check if session exists and user_id is available
-    if (req.session && req.session.user_id) {
-      // Fetch the user from the database using the session's user_id
-      const user = await User.findById(req.session.user_id);
-
+    const userId = req.session?.user_id;
+    if (userId) {
+      const user = await User.findById(userId);
       if (user) {
-        // Assign user_id to the request object for downstream use
         req.user_id = user._id.toString();
         return next();
       }
     }
-
     // If no user is found or session is missing, return 401 Unauthorized
     res.status(401).json({ message: 'User not authenticated' });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle any potential errors during the user lookup
     console.error('Error in authMiddleware:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -45,23 +40,20 @@ export const roleMiddleware = (requiredRoles: UserRole[]) => {
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     try {
-      // Ensure user_id is available on the request object
-      if (req.user_id) {
-        const user = await User.findById(req.user_id);
-
+      const userId = req.user_id;
+      if (userId) {
+        const user = await User.findById(userId);
         if (user && requiredRoles.includes(user.role)) {
-          // User has the required role, allow the request to proceed
-          return next();
+          return next(); // User has the required role, allow the request to proceed
         }
       }
-
       // If user does not have the required role, return 403 Forbidden
       res
         .status(403)
         .json({ message: 'Access denied: insufficient permissions' });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in roleMiddleware:', error);
       res.status(500).json({ message: 'Internal Server Error' });
     }

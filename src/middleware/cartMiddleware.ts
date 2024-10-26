@@ -32,18 +32,29 @@ export const ensureCartExists = async (
     let cart =
       (await Cart.findOne(cartCriteria)) ||
       new Cart({
-        user: userId || null,
-        sessionToken: userId ? null : sessionToken,
+        user: userId || undefined, // Ensure this is either a string or undefined
+        sessionToken: userId ? undefined : sessionToken, // Change null to undefined
       });
 
-    if (cart.isNew) await cart.save(); // Save only if new
+    if (cart.isNew) {
+      await cart.save(); // Save only if new
+    }
 
     req.cart = cart;
     next();
-  } catch (error) {
-    console.error('Error ensuring cart exists', error);
-    res
-      .status(500)
-      .json({ message: 'Failed to ensure cart', error: error.message });
+  } catch (error: unknown) {
+    console.error('Error ensuring cart exists:', error);
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: 'Failed to ensure cart', error: error.message });
+    } else {
+      res
+        .status(500)
+        .json({
+          message: 'Failed to ensure cart',
+          error: 'Unknown error occurred',
+        });
+    }
   }
 };

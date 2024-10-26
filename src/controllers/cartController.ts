@@ -15,7 +15,7 @@ interface CartOperation {
 }
 
 // Error handling utility
-const handleError = (error: any, message: string) => {
+const handleError = (error: any, message: string): void => {
   logger.error(message, error);
   throw new Error(message);
 };
@@ -51,30 +51,45 @@ const modifyCartItems = (
     ? cart.items.findIndex((item) => item.product.toString() === productId)
     : -1;
 
-  if (operation.type === 'add' && operation.quantity) {
-    if (itemIndex !== -1) {
-      cart.items[itemIndex].quantity += operation.quantity;
-    } else if (productId) {
-      cart.items.push({
-        _id: new mongoose.Types.ObjectId(), // Ensure _id is included
-        product: new mongoose.Types.ObjectId(productId),
-        quantity: operation.quantity,
-      } as ICartItem);
-    }
-  } else if (
-    operation.type === 'update' &&
-    operation.quantity &&
-    itemIndex !== -1
-  ) {
-    cart.items[itemIndex].quantity = operation.quantity;
-  } else if (operation.type === 'remove' && itemIndex !== -1) {
-    cart.items.splice(itemIndex, 1);
-  } else if (operation.type === 'sync' && operation.cartItems) {
-    cart.items = operation.cartItems.map((item) => ({
-      _id: new mongoose.Types.ObjectId(), // Add _id for type consistency
-      product: new mongoose.Types.ObjectId(item.product),
-      quantity: item.quantity,
-    })) as ICartItem[];
+  switch (operation.type) {
+    case 'add':
+      if (operation.quantity) {
+        if (itemIndex !== -1) {
+          cart.items[itemIndex].quantity += operation.quantity;
+        } else if (productId) {
+          cart.items.push({
+            _id: new mongoose.Types.ObjectId(), // Ensure _id is included
+            product: new mongoose.Types.ObjectId(productId),
+            quantity: operation.quantity,
+          } as ICartItem);
+        }
+      }
+      break;
+
+    case 'update':
+      if (operation.quantity && itemIndex !== -1) {
+        cart.items[itemIndex].quantity = operation.quantity;
+      }
+      break;
+
+    case 'remove':
+      if (itemIndex !== -1) {
+        cart.items.splice(itemIndex, 1);
+      }
+      break;
+
+    case 'sync':
+      if (operation.cartItems) {
+        cart.items = operation.cartItems.map((item) => ({
+          _id: new mongoose.Types.ObjectId(),
+          product: new mongoose.Types.ObjectId(item.product),
+          quantity: item.quantity,
+        })) as ICartItem[];
+      }
+      break;
+
+    default:
+      throw new Error('Invalid cart operation');
   }
 };
 
@@ -137,12 +152,13 @@ export const mergeCart = async (
         userCart.items[itemIndex].quantity += localItem.quantity;
       } else {
         userCart.items.push({
-          _id: new mongoose.Types.ObjectId(), // Adding _id here for consistency
+          _id: new mongoose.Types.ObjectId(),
           product: new mongoose.Types.ObjectId(localItem.product._id),
           quantity: localItem.quantity,
         } as ICartItem);
       }
     });
+
     return fetchOrSaveCart(userCart, { user: userId });
   } catch (error) {
     handleError(error, 'Failed to merge cart');
