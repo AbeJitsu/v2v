@@ -13,11 +13,11 @@ const router = Router();
 // Use each set of routes with /api prefix
 router.use('/api/auth', authRoutes);
 router.use('/api/cart', cartRoutes);
-router.use('/api/diagnostic', diagnosticRoutes()); // Call the function here
-router.use('/api/environment', environmentRoutes());
-router.use('/api/payment', paymentRoutes());
-router.use('/api/products', productRoutes());
-router.use('/api/search', searchRoutes());
-router.use('/api/user', userRoutes());
+router.use('/api/diagnostic', diagnosticRoutes);
+router.use('/api/environment', environmentRoutes);
+router.use('/api/payment', paymentRoutes);
+router.use('/api/products', productRoutes);
+router.use('/api/search', searchRoutes);
+router.use('/api/user', userRoutes);
 
 export default router;
