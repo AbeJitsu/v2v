@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
-// import connectDB from './db';
+import connectDB from './config/database-connection'; // Adjust the path as necessary
 import routes from './routes';
 import { placeholderMiddleware } from './middleware'; // Import the middleware
 
@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.NODE_ENV === 'test' ? 0 : process.env.PORT || 3000;
 
 // Connect to MongoDB
-// connectDB();
+connectDB();
 
 // Middleware to parse JSON requests
 app.use(express.json());
