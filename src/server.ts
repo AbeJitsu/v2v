@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 // import connectDB from './db';
 import routes from './routes';
+import { placeholderMiddleware } from './middleware'; // Import the middleware
 
 dotenv.config();
 
@@ -14,15 +15,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON requests
 app.use(express.json());
 
+// Use placeholder middleware for all routes
+app.use(placeholderMiddleware);
+
 // Use the routes
-app.use(routes); // Uncomment this to connect to routes
+app.use(routes); 
 
-// // Health check endpoint (hardcoded for now)
-// app.get('/health', (req, res) => {
-//   res.status(200).json({ status: 'OK' });
-// });
-
-app.use(routes);
 
 // Start the server and save the instance in a variable
 const server = app.listen(PORT, () => {

@@ -1,4 +1,7 @@
 import { Router } from 'express';
+
+import { placeholderMiddleware } from '../middleware';
+
 // import authRoutes from './authRoutes';
 // import cartRoutes from './cartRoutes';
 // import diagnosticRoutes from './diagnosticRoutes';
