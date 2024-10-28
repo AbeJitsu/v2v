@@ -1,5 +1,3 @@
-// src/routes/authRoutes.ts
-
 import express, { Request, Response } from 'express';
 import {
   register,
@@ -140,5 +138,4 @@ router.get(
   }
 );
 
-// Ensure proper export
 export default router;

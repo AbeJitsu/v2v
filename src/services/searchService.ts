@@ -1,4 +1,3 @@
-// src/services/searchService.ts
 import Product, { IProduct } from '../models/productModel';
 import { logger } from '../middleware/logger';
 import { FilterQuery } from 'mongoose';
@@ -15,7 +14,7 @@ const logAndSearch = async (
   errorMessage: string
 ): Promise<IProduct[]> => {
   try {
-    logger.debug(logMessage);
+    logger.info(logMessage); // Replaced 'debug' with 'info'
     return await Product.find(filter);
   } catch (error) {
     logger.error(errorMessage, error);
@@ -47,3 +46,13 @@ export const searchProductsByKeywords = (
     `Searching products with keywords: ${keywords}`,
     'Error searching products by keywords'
   );
+
+export const searchCategories = async (): Promise<string[]> => {
+  try {
+    logger.info('Retrieving distinct product categories'); // Replaced 'debug' with 'info'
+    return await Product.distinct('category');
+  } catch (error) {
+    logger.error('Error retrieving categories', error);
+    throw new Error('Error retrieving categories');
+  }
+};

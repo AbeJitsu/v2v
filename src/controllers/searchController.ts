@@ -1,4 +1,3 @@
-// src/controllers/searchController.ts
 import { Request, Response } from 'express';
 import * as searchService from '../services/searchService';
 import { validateSearchQuery } from '../utils/validationUtils';
@@ -24,7 +23,8 @@ const handleSearch = async (
 };
 
 export const searchProducts = async (req: Request, res: Response) => {
-  const { query, page = 1, limit = 10, category, sortBy, order } = req.query;
+  const query = req.query.query as string; // Explicitly cast to string
+  const { page = 1, limit = 10, category, sortBy, order } = req.query;
   const validationError = validateSearchQuery(query);
   if (validationError) {
     return res.status(400).json({ error: validationError });
@@ -38,15 +38,10 @@ export const searchProducts = async (req: Request, res: Response) => {
 };
 
 export const searchCategories = async (req: Request, res: Response) => {
-  const { query } = req.query;
-  const validationError = validateSearchQuery(query);
-  if (validationError) {
-    return res.status(400).json({ error: validationError });
-  }
   await handleSearch(
     res,
     searchService.searchCategories,
-    [query],
+    [],
     'Error in searchCategories'
   );
 };

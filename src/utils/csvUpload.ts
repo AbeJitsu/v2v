@@ -61,7 +61,7 @@ const processCSV = (file: CSVFile, type: string): Promise<void> => {
           reject(error);
         }
       })
-      .on('error', (error) => {
+      .on('error', (error: Error) => {
         console.error(`Error reading ${type} CSV file:`, error);
         reject(error);
       });
@@ -94,24 +94,3 @@ const saveProduct = async (item: CSVItem, type: string): Promise<void> => {
 
   await product.save();
 };
-
-
-
-
-Explain problem: Parameter 'error' implicitly has an 'any' type. @csvUplaod.ts:64:21
-
-Codeium
-4:47 pm, Oct 24, 2024
-The issue "Parameter 'error' implicitly has an 'any' type" is a TypeScript error that occurs when the type of a parameter is not explicitly defined. In this case, the error is occurring on the line where the parameter error is defined in the on('error') callback function.
-
-To fix this issue, you need to explicitly define the type of the error parameter. Based on the code snippet you provided, it seems that the error parameter is of type Error. You can define the type of the error parameter as Error like this:
-
-typescript
-CopyInsert
-.on('error', (error: Error) => {
-  console.error(`Error reading ${type} CSV file:`, error);
-  reject(error);
-})
-By explicitly defining the type of the error parameter as Error, you ensure that the TypeScript compiler knows the expected type of the parameter and can provide better type checking and error reporting.
-
-Let me know if you need further assistance!
