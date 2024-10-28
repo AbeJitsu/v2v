@@ -1,4 +1,3 @@
-/*
 import { Request, Response, NextFunction } from 'express';
 import { User, UserRole } from '../models/userModel';
 import session from 'express-session';
@@ -14,7 +13,7 @@ export const authMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.session?.user_id;
+    // const userId = req.session?.user_id;
     if (userId) {
       const user = await User.findById(userId);
       if (user) {
@@ -52,6 +51,5 @@ export const roleMiddleware = (requiredRoles: UserRole[]) => {
     }
   };
 };
-*/
 
-// export { authMiddleware, roleMiddleware };
+export { authMiddleware, roleMiddleware };

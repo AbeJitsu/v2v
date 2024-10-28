@@ -1,10 +1,15 @@
 // tests/integration/modelDatabaseConnection.test.ts
 import mongoose from 'mongoose';
-import connectDB from '../../src/config/database-connection'; // Adjust path if necessary
-import Session from '../../src/models/sessionModel'; // Adjust path if necessary
+import connectDB from '../../src/config/database-connection';
+import Session from '../../src/models/sessionModel';
 
 beforeAll(async () => {
   await connectDB(); // Connect to the database before all tests
+});
+
+beforeEach(async () => {
+  // Clean up the sessions collection before each test
+  await Session.deleteMany({});
 });
 
 afterAll(async () => {
@@ -14,7 +19,7 @@ afterAll(async () => {
 describe('Model Database Connection', () => {
   it('should create a session in the database', async () => {
     const sessionData = {
-      _id: 'testSessionId',
+      _id: `testSessionId_${Date.now()}`, // Unique ID using timestamp
       session: 'sampleSessionData',
       expires: new Date(Date.now() + 1000 * 60 * 60), // 1 hour expiration
     };

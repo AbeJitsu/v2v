@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { middlewareControllerRoute } from '../middleware';
+import sessionRoutes from './sessionRoutes';
 // Import placeholderController if it's used directly, else handled in middleware
 // import { placeholderController } from '../controllers';
 
@@ -17,6 +18,9 @@ const router = Router();
 
 // Health check endpoint for testing with middleware-controller connection
 router.get('/health', middlewareControllerRoute);
+
+// Integrated session routes under the /sessions path
+router.use('/sessions', sessionRoutes);
 
 // Use each set of routes with /api prefix
 // router.use('/api/auth', authRoutes);

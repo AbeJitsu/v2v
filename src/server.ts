@@ -7,7 +7,7 @@ import { placeholderMiddleware } from './middleware'; // Import the middleware
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.NODE_ENV === 'test' ? 0 : process.env.PORT || 3000;
 
 // Connect to MongoDB
 // connectDB();
@@ -19,13 +19,17 @@ app.use(express.json());
 app.use(placeholderMiddleware);
 
 // Use the routes
-app.use(routes); 
-
+app.use(routes);
 
 // Start the server and save the instance in a variable
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  const address = server.address();
+  const port = typeof address === 'string' ? PORT : address?.port;
+  console.log(`Server is running on port ${port}`);
 });
 
-// Export both the app and server
-export { app, server };
+// Function to close the server, useful for tests
+const closeServer = () => server.close();
+
+// Export both the app and server, including the close function
+export { app, server, closeServer };
