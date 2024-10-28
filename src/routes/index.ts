@@ -1,6 +1,8 @@
 import { Router } from 'express';
 
-import { placeholderMiddleware } from '../middleware';
+import { middlewareControllerRoute } from '../middleware';
+// Import placeholderController if it's used directly, else handled in middleware
+// import { placeholderController } from '../controllers';
 
 // import authRoutes from './authRoutes';
 // import cartRoutes from './cartRoutes';
@@ -13,10 +15,8 @@ import { placeholderMiddleware } from '../middleware';
 
 const router = Router();
 
-// Health check endpoint for testing purposes
-router.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
-});
+// Health check endpoint for testing with middleware-controller connection
+router.get('/health', middlewareControllerRoute);
 
 // Use each set of routes with /api prefix
 // router.use('/api/auth', authRoutes);
