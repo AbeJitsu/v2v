@@ -17,10 +17,12 @@ app.use(express.json());
 // Use the routes
 app.use(routes); // Uncomment this to connect to routes
 
-// Health check endpoint (hardcoded for now)
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
-});
+// // Health check endpoint (hardcoded for now)
+// app.get('/health', (req, res) => {
+//   res.status(200).json({ status: 'OK' });
+// });
+
+app.use(routes);
 
 // Start the server and save the instance in a variable
 const server = app.listen(PORT, () => {
