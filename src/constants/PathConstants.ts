@@ -4,14 +4,15 @@ export const API_PATHS = {
   HEALTH_CHECK: '/health',
   USER: '/api/user',
   PRODUCT: '/api/product',
+  // Add other paths as needed
 };
 
 export const DB_PATHS = {
-  CONNECT_DB: './db',
+  CONNECT_DB: './config/database-connection',
 };
 
 export const SERVER_PATHS = {
-  SERVER: '../../src/server', // Relative path for tests
+  SERVER: '../../src/server', // Check if this relative path is accurate in the context where it's used
 };
 
 export const UTIL_PATHS = {

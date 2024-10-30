@@ -1,5 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import { Request } from 'express'; // Import Request for better type definition
+import { API_PATHS } from '../constants/PathConstants'; // Import path constants
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -15,7 +16,7 @@ const apiLimiter = rateLimit({
   },
   skip: (req: Request) => {
     // Skip rate limiting for health checks or any other paths if needed
-    return req.path === '/health';
+    return req.path === API_PATHS.HEALTH_CHECK; // Use constant for the path
   },
 });
 

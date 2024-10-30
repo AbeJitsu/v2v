@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { API_PATHS } from '../constants/PathConstants'; // Import path constants
 
 import { middlewareControllerRoute } from '../middleware';
 import sessionRoutes from './sessionRoutes';
@@ -17,19 +18,14 @@ import sessionRoutes from './sessionRoutes';
 const router = Router();
 
 // Health check endpoint for testing with middleware-controller connection
-router.get('/health', middlewareControllerRoute);
+router.get(API_PATHS.HEALTH_CHECK, middlewareControllerRoute); // Use constant for the health check path
 
 // Integrated session routes under the /sessions path
 router.use('/sessions', sessionRoutes);
 
 // Use each set of routes with /api prefix
-// router.use('/api/auth', authRoutes);
-// router.use('/api/cart', cartRoutes);
-// router.use('/api/diagnostic', diagnosticRoutes);
-// router.use('/api/environment', environmentRoutes);
-// router.use('/api/payment', paymentRoutes);
-// router.use('/api/products', productRoutes);
-// router.use('/api/search', searchRoutes);
-// router.use('/api/user', userRoutes);
+// router.use(API_PATHS.USER, userRoutes);
+// router.use(API_PATHS.PRODUCT, productRoutes);
+// Further API routes can be updated similarly using API_PATHS constants
 
 export default router;
