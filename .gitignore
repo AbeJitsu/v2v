@@ -1,3 +1,10 @@
 node_modules/
 dist/
 .env
+.DS_Store
+.vscode/
+.vscode-test/
+coverage/
+coverage-*
+coverage-report/
+coverage-summary/

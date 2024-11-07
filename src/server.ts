@@ -22,4 +22,7 @@ const startServer = () => {
 // Function to close the server, useful for tests
 const closeServer = () => server && server.close();
 
+// Start the server
+startServer();
+
 export { app, server, startServer, closeServer };
