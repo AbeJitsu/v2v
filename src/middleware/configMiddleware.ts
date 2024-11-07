@@ -1,4 +1,10 @@
-import express, { Application } from 'express';
+import express, {
+  Application,
+  RequestHandler,
+  NextFunction,
+  Request,
+  Response,
+} from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -20,21 +26,27 @@ const corsOptions = {
  * @param app - The Express application
  */
 const configMiddleware = (app: Application): void => {
-  const middleware = [
+  // Explicitly type the middleware array
+  const middleware: RequestHandler[] = [
     attachLogger,
-    cors(corsOptions),
+    cors(corsOptions) as RequestHandler,
     express.json(),
     express.urlencoded({ extended: true }),
     helmet(),
-    errorHandler,
   ];
 
   // Add request logging only in development
   if (isDevelopment) {
-    middleware.push(morgan('dev'));
+    middleware.push(morgan('dev') as RequestHandler);
   }
 
+  // Apply each middleware
   middleware.forEach((fn) => app.use(fn));
+
+  // Add error handling middleware separately
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    errorHandler(err, req, res, next);
+  });
 };
 
 export default configMiddleware;
