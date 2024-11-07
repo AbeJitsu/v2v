@@ -7,18 +7,19 @@ interface AuthenticatedRequest extends Request {
   user_id?: string;
 }
 
-export const authMiddleware = async (
+const authMiddleware = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // const userId = req.session?.user_id;
+    const userId = req.session?.user_id;
     if (userId) {
       const user = await User.findById(userId);
       if (user) {
         req.user_id = user._id.toString();
-        return next();
+        next();
+        return;
       }
     }
     res.status(401).json({ message: 'User not authenticated' });
@@ -28,18 +29,19 @@ export const authMiddleware = async (
   }
 };
 
-export const roleMiddleware = (requiredRoles: UserRole[]) => {
+const roleMiddleware = (requiredRoles: UserRole[]) => {
   return async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      const userId = req.user_id;
+      const userId = req.user_id; // Use the user_id that has been set by authMiddleware
       if (userId) {
         const user = await User.findById(userId);
         if (user && requiredRoles.includes(user.role)) {
-          return next();
+          next();
+          return;
         }
       }
       res
@@ -52,4 +54,5 @@ export const roleMiddleware = (requiredRoles: UserRole[]) => {
   };
 };
 
+// Ensure that exports are done correctly without conflicts
 export { authMiddleware, roleMiddleware };
